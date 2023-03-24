@@ -1,10 +1,12 @@
 import path from 'path';
 import playSound from 'play-sound';
 
-const audioPath = path.join(__dirname,'../','media/test.wav');
+const Sound = async () => {
+  const audioPath = path.join(__dirname, '../', 'media/test.wav');
 
-
-playSound().play(audioPath,(err)=> {
+  await playSound().play(audioPath, (err) => {
     if (err) throw err;
-})
+  });
+};
 
+export { Sound };

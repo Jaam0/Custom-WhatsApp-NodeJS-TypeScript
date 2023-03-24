@@ -7,6 +7,7 @@ import { DropStrEnd, getTime } from '../utils/others.handle';
 import { SubStrExt } from '../interfaces/substr.interface';
 import { createExcel } from '../utils/excel.handle';
 import { Extensions } from '../enums/extension.enum';
+import { Sound } from '../utils/sound.handle';
 
 let client: any;
 
@@ -36,6 +37,7 @@ const customWhatsApp = async () => {
 
 const ListenMessage = () => {
   client.on('message', (msj: any) => {
+    Sound();
     const { from, body, notifyName } = msj._data;
     console.log(
       `${color.green('From')}:${from}, ${color.green('Name')}:${notifyName}, ${color.green(

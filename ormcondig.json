@@ -1,0 +1,25 @@
+{
+    "type": "mariadb",
+    "host": "localhost",
+    "port": 3306,
+    "username": "jessie",
+    "password": "password",
+    "database": "custom_whatsapp_db",
+    "entities": [
+        "build/src/models/dbModels/**/*.js",
+        "src/models/dbModels/**/*.ts"
+    ],
+    "migrations": [
+        "build/src/migration/**/*.js",
+        "src/migration/**/*.ts"
+    ],
+    "subscribers": [
+        "build/src/subscriber/**/*.js",
+        "src/subscriber/**/*.ts"
+    ],
+    "cli": {
+        "entitiesDir": "build/src/entity",
+        "migrationsDir": "build/src/migration",
+        "subscribersDir": "build/src/subscriber"
+    }
+}

@@ -2,8 +2,15 @@ import excelJS from 'exceljs';
 import moment from 'moment';
 import fs from 'fs';
 import Path from 'path';
+import { DropStrEnd } from './others.handle';
+import { Extensions } from '../enums/extension.enum';
 
 export const createExcel = async (from: string, name: string, msj: string) => {
+  const { ext } = DropStrEnd(from);
+
+  if (ext !== Extensions.contact) {
+    return false;
+  }
   const path = Path.join(__dirname, '../', `records/${from}.xlsx`);
   const dateAndTime: string = moment().format('DD-MM-YYYY hh:mm');
   let sheet;
@@ -53,5 +60,3 @@ export const createExcel = async (from: string, name: string, msj: string) => {
       });
   }
 };
-
-
