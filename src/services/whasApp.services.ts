@@ -97,4 +97,4 @@ const saveOnDB = async ({
   }
 };
 
-export { customWhatsApp };
+export { customWhatsApp,message };
