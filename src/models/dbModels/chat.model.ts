@@ -4,19 +4,22 @@ import { DataBase } from '../../database/db';
 
 const DB = new DataBase();
 
-const Message = DB.Source().define(
-  'message',
+const Chat = DB.Source().define(
+  'chat',
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
+    from: {
+      type: DataTypes.STRING(20),
+    },
+    name: {
+      type: DataTypes.STRING(60),
+    },
     message: {
       type: DataTypes.STRING(1000),
-    },
-    description: {
-      type: DataTypes.STRING(500),
     },
     status: {
       type: DataTypes.STRING(7),
@@ -28,7 +31,7 @@ const Message = DB.Source().define(
   }
 );
 
-Message.sync()
+Chat.sync()
   .then(() => {
     console.log(`Table message was synchronized`);
   })
@@ -36,4 +39,4 @@ Message.sync()
     console.error('Something was wrong trying to sync the tabla message', err);
   });
 
-export { Message };
+export { Chat };

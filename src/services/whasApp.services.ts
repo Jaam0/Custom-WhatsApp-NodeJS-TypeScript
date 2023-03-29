@@ -8,6 +8,9 @@ import { SubStrExt } from '../interfaces/substr.interface';
 import { createExcel } from '../utils/excel.handle';
 import { Extensions } from '../enums/extension.enum';
 import { Sound } from '../utils/sound.handle';
+import { ChatInterface } from '../interfaces/chat.interface';
+import { Chat } from '../models/dbModels/chat.model';
+import { Status } from '../enums/status.enum';
 
 let client: any;
 
@@ -35,10 +38,15 @@ const customWhatsApp = async () => {
   client.initialize();
 };
 
-const ListenMessage = () => {
+const ListenMessage = async () => {
   client.on('message', (msj: any) => {
     Sound();
     const { from, body, notifyName } = msj._data;
+    const data: ChatInterface = {
+      from,
+      name: notifyName,
+      message: body,
+    };
     console.log(
       `${color.green('From')}:${from}, ${color.green('Name')}:${notifyName}, ${color.green(
         'Message'
@@ -57,7 +65,8 @@ const ListenMessage = () => {
         message(from, 'Bien gracias a Dios y tu?');
         break;
     }
-    createExcel(from, notifyName, body);
+    saveOnDB(data);
+    // createExcel(from, notifyName, body);
   });
 };
 
@@ -73,6 +82,19 @@ const message = (from: string, body: string) => {
 const sendMedia = (from: string, file: string) => {
   const mediaFile = MessageMedia.fromFilePath(`./media/${file}`);
   client.sendMessage(from, mediaFile);
+};
+
+const saveOnDB = async ({
+  from,
+  name,
+  message,
+  status = Status.Active,
+}: ChatInterface): Promise<void> => {
+  try {
+    const res = await Chat.create({ from, name, message, status });
+  } catch (err) {
+    console.log(`Something happened saving on database - Table Chat - Error: ${err}`);
+  }
 };
 
 export { customWhatsApp };
