@@ -3,3 +3,9 @@ export enum Greetings {
   Afternoon = 'Buenas tardes',
   Night = 'Buenas noches',
 }
+
+export enum GreetingsRealName {
+  Morning = 'Morning',
+  Afternoon = 'Afternoon',
+  Night = 'Night',
+}

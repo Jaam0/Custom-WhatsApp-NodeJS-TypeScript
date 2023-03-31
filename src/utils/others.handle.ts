@@ -1,6 +1,5 @@
-import moment from 'moment'
-import { SubStrExt } from 'src/interfaces/substr.interface';
-import { CustomTime } from '../models/CustomTime.class';
+import { Greetings } from '../enums/greetings.enum';
+import { SubStrExt } from '../interfaces/substr.interface';
 
 const DropStrEnd = (str: string): SubStrExt => {
   return {
@@ -8,32 +7,35 @@ const DropStrEnd = (str: string): SubStrExt => {
     ext: str.substring(str.length - 5),
   };
 };
-const getTime = (): CustomTime => {
-  const customTime = new CustomTime();
-  const hora: number = Number(
-    `${moment().hour()}${moment().minute()}${moment().second()}${moment().millisecond()}`
-  );
 
-  if (hora >= 18000000 && hora <= 235959999) {
-    customTime.timeStart = 18000000;
-    customTime.timeEnd = 235959999;
-    customTime.realTime = hora;
-    customTime.status = 'Night';
-    customTime.statusTime = 'PM';
-  } else if (hora >= 12000000 && hora <= 175959999) {
-    customTime.timeStart = 12000000;
-    customTime.timeEnd = 175959999;
-    customTime.realTime = hora;
-    customTime.status = 'Afternoon';
-    customTime.statusTime = 'PM';
-  } else {
-    customTime.timeStart = 100000000;
-    customTime.timeEnd = 115959999;
-    customTime.realTime = hora;
-    customTime.status = 'Morning';
-    customTime.statusTime = 'AM';
+const greetingsSubst = (answer: string, name: string, greeting: Greetings): string => {
+  return answer.replace('@welcome', greeting).replace('@name', name);
+};
+const theTime = (): string => {
+  const dbTime = {
+    morning: {
+      start: 0,
+      end: 1159,
+    },
+    afternoon: {
+      start: 1200,
+      end: 1859,
+    },
+    night: {
+      start: 1900,
+      end: 2359,
+    },
+  };
+
+  const now = new Date();
+  const hourWithMinutes = Number(`${now.getHours()}${now.getMinutes()}`);
+
+  if (hourWithMinutes >= dbTime.morning.start && hourWithMinutes <= dbTime.morning.end) {
+    return 'Morning';
+  } else if (hourWithMinutes >= dbTime.afternoon.start && hourWithMinutes <= dbTime.afternoon.end) {
+    return 'Afternoon';
   }
-  return customTime;
+  return 'Night';
 };
 
-export { DropStrEnd, getTime };
+export { DropStrEnd, theTime, greetingsSubst };
