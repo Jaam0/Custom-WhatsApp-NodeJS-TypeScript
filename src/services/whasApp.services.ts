@@ -85,30 +85,76 @@ const ListenMessage = async () => {
       const time = theTime();
 
       const response = {
-        Morning: async () => {
+        Morning: async (opt?: boolean) => {
           const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Morning);
           await cachingAnswer(from, answer, GreetingsRealName.Morning);
           await message(from, answer);
         },
-        Afternoon: async () => {
+        Afternoon: async (opt?: boolean) => {
           const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Afternoon);
           await cachingAnswer(from, answer, GreetingsRealName.Afternoon);
           await message(from, answer);
         },
-        Night: async () => {
+        Night: async (opt?: boolean) => {
+          if (opt) {
+            const rowKey = await gettingKey(Greetings.Night);
+            const answerFromRedis = greetingsSubst(rowKey.answer, notifyName, Greetings.Night);
+            console.log('Response from redis......');
+            await message(from, answerFromRedis);
+          }
           const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
-          await cachingAnswer(from, answer, GreetingsRealName.Night);
+          await cachingAnswer(from, messageAnswer.message, GreetingsRealName.Night);
           await message(from, answer);
         },
       };
 
+      // const response2 = {
+      //   1: async () => {
+      //     // const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Morning);
+      //     await cachingAnswer(from, answer, GreetingsRealName.Morning);
+      //     await message(from, answer);
+      //   },
+      //   Alta: async () => {
+      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Afternoon);
+      //     await cachingAnswer(from, answer, GreetingsRealName.Afternoon);
+      //     await message(from, answer);
+      //   },
+      //   2: async () => {
+      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
+      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
+      //     await message(from, answer);
+      //   },
+      //   Media: async () => {
+      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
+      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
+      //     await message(from, answer);
+      //   },
+      //   3: async () => {
+      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
+      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
+      //     await message(from, answer);
+      //   },
+      //   Baja: async () => {
+      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
+      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
+      //     await message(from, answer);
+      //   },
+      // };
+
       if (time in response) {
 
-        //TODO: To check if I already sent the first message to the contact
-        const keyFromRedis = await gettingKey(from);
+        
 
-        // If keyFromRedis is true doesn't send the answer again
-        if (keyFromRedis) return console.log(keyFromRedis);
+        const nameProperties = Object.getOwnPropertyNames(time);
+        //TODO: To check if I already sent the first message to the contact
+        const keyFromRedis = await gettingKey(time);
+
+        // If keyFromRedis is true, it will not send the answer again
+        // if (keyFromRedis) return console.log(keyFromRedis);
+        if (keyFromRedis) {
+          await response[time](true);
+        }
+
         //Working on............
         await response[time]();
       }
@@ -161,7 +207,7 @@ const cachingAnswer = async (from: string, answer: string, status: GreetingsReal
   await redis.Caching();
 };
 
-const gettingKey = async (from: string): Promise<AnswerCachingInterface> => {
+const gettingKey = async (from: string | string[]): Promise<AnswerCachingInterface> => {
   const redis = new Redis(from);
   const res = await redis.GetKey();
   return JSON.parse(res);

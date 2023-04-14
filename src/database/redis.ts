@@ -8,16 +8,20 @@ export class Redis {
     url: this.urlConection,
   });
 
-  constructor(private from?: string, private answer?: string, private status?: string) {}
+  constructor(private from?: string | string[], private answer?: string, private status?: string) {}
 
   async Caching(): Promise<void> {
     try {
       await this.redisClient.connect().catch((err) => {
         console.error(`Something happen trying to connect to redis (Caching) - Error:${err}`);
       });
+      // await this.redisClient.set(
+      //   `${this.nameKey}:${this.from}`,
+      //   JSON.stringify({ to: this.from, answer: this.answer, status: this.status })
+      // );
       await this.redisClient.set(
-        `${this.nameKey}:${this.from}`,
-        JSON.stringify({ to: this.from, answer: this.answer, status: this.status })
+        `${this.nameKey}:${this.status}`,
+        JSON.stringify({ answer: this.answer })
       );
       await this.redisClient.disconnect();
     } catch (err) {
