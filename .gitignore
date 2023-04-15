@@ -4,3 +4,4 @@ build/
 .wwebjs_auth/
 .vscode/
 coverage/
+App_custom_whatsapp.session.sql

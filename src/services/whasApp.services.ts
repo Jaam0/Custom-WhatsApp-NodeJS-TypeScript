@@ -5,7 +5,6 @@ import { createSpinner } from 'nanospinner';
 import qrcode from 'qrcode-terminal';
 import { DropStrEnd, theTime } from '../utils/others.handle';
 import { SubStrExt } from '../interfaces/substr.interface';
-import { createExcel } from '../utils/excel.handle';
 import { Extensions } from '../enums/extension.enum';
 import { Sound } from '../utils/sound.handle';
 import { ChatInterface } from '../interfaces/chat.interface';
@@ -19,6 +18,7 @@ import { Redis } from '../database/redis';
 import { AnswerCachingInterface } from '../interfaces/answer.caching.interface';
 
 let client: any;
+let ext: string;
 
 const customWhatsApp = async () => {
   client = new Client({
@@ -60,11 +60,11 @@ const ListenMessage = async () => {
   };
   client.on('message', async (msj: any) => {
     try {
-      Sound();
       const { from, body, notifyName } = msj._data;
       data.from = from;
       data.name = notifyName;
       data.message = body;
+      ext = DropStrEnd(data.from).ext;
 
       console.log(
         `${color.green('From')}:${from}, ${color.green('Name')}:${notifyName}, ${color.green(
@@ -86,83 +86,97 @@ const ListenMessage = async () => {
 
       const response = {
         Morning: async (opt?: boolean) => {
-          const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Morning);
-          await cachingAnswer(from, answer, GreetingsRealName.Morning);
-          await message(from, answer);
+          if (opt) {
+            const rowKey = await gettingKey(
+              from,
+              GreetingsRealName.Night,
+              GreetingsRealName.Morning
+            );
+            const answerFromRedis = greetingsSubst(rowKey.answer, notifyName, Greetings.Morning);
+            await message(from, answerFromRedis);
+          } else {
+            const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Morning);
+            await cachingAnswer(from, messageAnswer.message, GreetingsRealName.Morning);
+            await message(from, answer);
+          }
         },
         Afternoon: async (opt?: boolean) => {
-          const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Afternoon);
-          await cachingAnswer(from, answer, GreetingsRealName.Afternoon);
-          await message(from, answer);
+          if (opt) {
+            const rowKey = await gettingKey(
+              from,
+              GreetingsRealName.Night,
+              GreetingsRealName.Afternoon
+            );
+            const answerFromRedis = greetingsSubst(rowKey.answer, notifyName, Greetings.Afternoon);
+            await message(from, answerFromRedis);
+          } else {
+            const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Afternoon);
+            await cachingAnswer(from, messageAnswer.message, GreetingsRealName.Afternoon);
+            await message(from, answer);
+          }
         },
         Night: async (opt?: boolean) => {
           if (opt) {
-            const rowKey = await gettingKey(Greetings.Night);
+            const rowKey = await gettingKey(from, GreetingsRealName.Night, GreetingsRealName.Night);
             const answerFromRedis = greetingsSubst(rowKey.answer, notifyName, Greetings.Night);
-            console.log('Response from redis......');
             await message(from, answerFromRedis);
+          } else {
+            const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
+            await cachingAnswer(from, messageAnswer.message, GreetingsRealName.Night);
+            await message(from, answer);
           }
-          const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
-          await cachingAnswer(from, messageAnswer.message, GreetingsRealName.Night);
-          await message(from, answer);
         },
       };
 
-      // const response2 = {
-      //   1: async () => {
-      //     // const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Morning);
-      //     await cachingAnswer(from, answer, GreetingsRealName.Morning);
-      //     await message(from, answer);
-      //   },
-      //   Alta: async () => {
-      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Afternoon);
-      //     await cachingAnswer(from, answer, GreetingsRealName.Afternoon);
-      //     await message(from, answer);
-      //   },
-      //   2: async () => {
-      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
-      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
-      //     await message(from, answer);
-      //   },
-      //   Media: async () => {
-      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
-      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
-      //     await message(from, answer);
-      //   },
-      //   3: async () => {
-      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
-      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
-      //     await message(from, answer);
-      //   },
-      //   Baja: async () => {
-      //     const answer = greetingsSubst(messageAnswer.message, notifyName, Greetings.Night);
-      //     await cachingAnswer(from, answer, GreetingsRealName.Night);
-      //     await message(from, answer);
-      //   },
-      // };
+      const response2 = {
+        1: async () => {
+          Sound('youGotmail.wav');
+          await message(from, 'En breve te atendemos - Alta');
+        },
+        Alta: async () => {
+          Sound('youGotmail.wav');
+          await message(from, 'En breve te atendemos - Alta');
+        },
+        2: async () => {
+          Sound('youGotmail.wav');
+          await message(from, 'En unos minutos te atendemos - Media');
+        },
+        Media: async () => {
+          Sound('youGotmail.wav');
+          await message(from, 'En unos minutos te atendemos - Media');
+        },
+        3: async () => {
+          Sound('youGotmail.wav');
+          await message(from, 'Desde que termine de una tarea te le atiendo - Baja');
+        },
+        Baja: async () => {
+          Sound('youGotmail.wav');
+          await message(from, 'Desde que termine de una tarea te le atiendo - Baja');
+        },
+      };
 
-      if (time in response) {
+      if (time in response && ext === Extensions.contact) {
+        const keyFromRedis = await gettingKey(from, body, time);
 
-        
-
-        const nameProperties = Object.getOwnPropertyNames(time);
-        //TODO: To check if I already sent the first message to the contact
-        const keyFromRedis = await gettingKey(time);
-
-        // If keyFromRedis is true, it will not send the answer again
-        // if (keyFromRedis) return console.log(keyFromRedis);
         if (keyFromRedis) {
-          await response[time](true);
+          if (Object.hasOwn(response2, body)) {
+            await saveOnDB(data);
+            await response2[body]();
+          } else {
+            await saveOnDB(data);
+            return true;
+          }
+        } else {
+          if (ext === Extensions.contact) {
+            await saveOnDB(data);
+            await response[time]();
+          }
+          return false;
         }
-
-        //Working on............
-        await response[time]();
       }
     } catch (error) {
       console.log(error);
     }
-
-    await saveOnDB(data);
   });
 };
 
@@ -202,13 +216,17 @@ const getBodyMessageFromDB = async () => {
   }
 };
 
-const cachingAnswer = async (from: string, answer: string, status: GreetingsRealName) => {
+const cachingAnswer = async (from: string, answer: string, status: GreetingsRealName | string) => {
   const redis = new Redis(from, answer, status);
   await redis.Caching();
 };
 
-const gettingKey = async (from: string | string[]): Promise<AnswerCachingInterface> => {
-  const redis = new Redis(from);
+const gettingKey = async (
+  from: string | string[],
+  answer: string,
+  status: GreetingsRealName | string
+): Promise<AnswerCachingInterface> => {
+  const redis = new Redis(from, answer, status);
   const res = await redis.GetKey();
   return JSON.parse(res);
 };

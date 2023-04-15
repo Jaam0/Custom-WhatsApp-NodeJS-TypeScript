@@ -15,13 +15,12 @@ export class Redis {
       await this.redisClient.connect().catch((err) => {
         console.error(`Something happen trying to connect to redis (Caching) - Error:${err}`);
       });
-      // await this.redisClient.set(
-      //   `${this.nameKey}:${this.from}`,
-      //   JSON.stringify({ to: this.from, answer: this.answer, status: this.status })
-      // );
       await this.redisClient.set(
-        `${this.nameKey}:${this.status}`,
-        JSON.stringify({ answer: this.answer })
+        `${this.nameKey}:${this.status}:${this.from}`,
+        JSON.stringify({ answer: this.answer }),{
+          EX: 600,
+          NX: true
+        }
       );
       await this.redisClient.disconnect();
     } catch (err) {
@@ -33,7 +32,7 @@ export class Redis {
       await this.redisClient.connect().catch((err) => {
         console.error(`Something happen trying to connect to redis (Caching) - Error:${err}`);
       });
-      const res = await this.redisClient.get(`${this.nameKey}:${this.from}`);
+      const res = await this.redisClient.get(`${this.nameKey}:${this.status}:${this.from}`);
       await this.redisClient.disconnect();
       return res;
     } catch (err) {
