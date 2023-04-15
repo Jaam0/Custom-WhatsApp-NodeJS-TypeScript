@@ -1,4 +1,4 @@
-# Custom WhatsApp NodeJS ans TypeScript
+# Custom WhatsApp NodeJS and TypeScript
 
 **Description**
 
@@ -57,17 +57,17 @@ If you want to run this application, you'll need to install  the software list b
 ## Create a file with extension .env and the you have to fill all the variable given below:
 
 **Credentials for main database**
-DB_HOST=
-DB_USER=
-DB_PASS=
-DATABASE=
-DB_PORT=
+- DB_HOST=
+- DB_USER=
+- DB_PASS=
+- DATABASE=
+- DB_PORT=
 
 **Credentials for redis**
-REDIS_HOST=
-REDIS_PORT=
-REDIS_URL=
-REDIS_NAME_KEY=
+- REDIS_HOST=
+- REDIS_PORT=
+- REDIS_URL=
+- REDIS_NAME_KEY=
 
 
 ### Commands to run the application:
@@ -88,6 +88,6 @@ If you want to run in dev envirioment run the command
 
 ### Contact me
 
-**Name:**Jessie A. Alvarez M.
-**Email:**jessieaam0@gmail.com
+- **Name:** Jessie A. Alvarez M.
+- **Email:** jessieaam0@gmail.com
 
