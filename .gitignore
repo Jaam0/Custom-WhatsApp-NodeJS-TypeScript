@@ -3,5 +3,6 @@ node_modules/
 build/
 .wwebjs_auth/
 .vscode/
+/coverage.data
 coverage/
 App_custom_whatsapp.session.sql
